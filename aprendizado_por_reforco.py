@@ -6,8 +6,8 @@ from torchvision import transforms
 from torch.utils.data import DataLoader, Dataset
 from PIL import Image, UnidentifiedImageError
 import os
-from ultralytics import YOLO  # YOLOv8
-import torch.nn.functional as F  # Para funções ativação
+from ultralytics import YOLO
+import torch.nn.functional as F
 
 # Transformação para pré-processar as imagens
 transform = transforms.Compose([
@@ -54,7 +54,7 @@ def collate_fn(batch):
 data_loader = DataLoader(dataset, batch_size=1, shuffle=True, collate_fn=collate_fn)
 
 # Carregar o modelo YOLOv8 pré-treinado
-yolo_model = YOLO("best.pt")  # ou use seu próprio modelo treinado
+yolo_model = YOLO("best.pt")
 
 # Definindo a arquitetura da rede
 class PolicyNetwork(nn.Module):
@@ -73,7 +73,7 @@ class PolicyNetwork(nn.Module):
         self.fc = nn.Sequential(
             nn.Linear(64 * 77 * 77, 128),  # Ajuste este valor baseado na saída da convolução
             nn.ReLU(),
-            nn.Linear(128, 2)  # 2 ações (exemplo)
+            nn.Linear(128, 2)  # 2 ações
         )
 
     def forward(self, x):
@@ -89,7 +89,7 @@ optimizer = optim.Adam(policy_net.parameters(), lr=1e-3)
 criterion = nn.MSELoss()
 
 # Hiperparâmetros
-gamma, epsilon, num_episodes = 0.99, 0.1, 1
+gamma, epsilon, num_episodes = 0.99, 0.1, 100
 
 # Função para calcular a recompensa baseada nas detecções do YOLOv8
 def calcular_recompensa(deteccoes, classes_esperadas):
@@ -137,7 +137,7 @@ for episode in range(num_episodes):
         
         # Extrair a recompensa do YOLOv8
         deteccoes = yolo_model(state)  # Faz a detecção usando o YOLO
-        classes_esperadas = [0, 1]  # Exemplo: classes esperadas (mudar conforme seu caso)
+        classes_esperadas = [0, 1, 2, 3, 4, 5]  # dormindo, prestando atenção, mexendo no celular, copiando, disperso, trabalho em grupo
         reward = calcular_recompensa(deteccoes, classes_esperadas)
         
         next_state = torch.rand_like(state)  # Usando um next_state aleatório para este exemplo
